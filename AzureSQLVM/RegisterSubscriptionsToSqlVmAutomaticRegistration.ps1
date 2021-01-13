@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Register provided subscriptions with Automatic Registration feature. Failed registration information will be stored in RegistrationErrors.csv
+    Register all Azure susbscriptions associated with the account with SQL IaaS Extension Automatic Registration feature. Failed registration information will be stored in RegistrationErrors.csv
     file in the current directory where this script is executed. RegistrationErrors.csv will be empty when there are no errors in subscription registration.
 .DESCRIPTION
     Registering each subscription is a two step process:
@@ -11,16 +11,14 @@
     - The user account running the script should have "Microsoft.Features/providers/features/register/action" RBAC access over the subscriptions.
 
 .EXAMPLE
-    To register list of Subscriptions
-    .\RegisterSubscriptionsToSqlVmAutomaticRegistration.ps1 -SubscriptionList SubscriptionId1,SubscriptionId2
-
+    To register all Subscriptions that the account is associated with
+    .\RegisterSubscriptionsToSqlVmAutomaticRegistration.ps1
 #>
 Param
 (
     [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
     [Guid[]]
-    $SubscriptionList
 );
 
 #Array of objects for storing failure subscriptionIds and failure reasons.
@@ -34,7 +32,7 @@ if ($PSVersionTable.PSEdition -eq 'Desktop' -and (Get-Module -Name AzureRM -List
 
     Write-Host "Please login to your account which have access to the listed subscriptions";
     $Output = Connect-AzureRmAccount -ErrorAction Stop;
-
+    $SubscriptionList = $(Get-AzureRmSubscription).Id
     foreach ($SubscriptionId in $SubscriptionList) {
         Write-host "`n`n--------------------$SubscriptionId----------------------------`n`n";
 
@@ -68,7 +66,7 @@ else {
 
     Write-Host "Please login to your account which have access to the listed subscriptions";
     $Output = Connect-AzAccount -ErrorAction Stop;
-
+    $SubscriptionList = $(Get-AzSubscription).Id
     foreach ($SubscriptionId in $SubscriptionList) {
         Write-host "`n`n--------------------$SubscriptionId----------------------------`n`n"
 
